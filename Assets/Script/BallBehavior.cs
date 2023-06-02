@@ -25,7 +25,7 @@ namespace Script {
 
         private IEnumerator RepositionRandomly() {
             var randomPosition = GetRandomPositionInBound();
-            while (IsPositionValid(randomPosition) == false) {
+            while (!IsPositionValid(randomPosition)) {
                 randomPosition = GetRandomPositionInBound();
             }
 
@@ -38,12 +38,8 @@ namespace Script {
         }
 
         private bool IsPositionValid(Vector3 position) {
-            Collider[] colliders = new Collider[10];
-
-            int numColliders = Physics.OverlapSphereNonAlloc(position, 0.4f, colliders, Physics.AllLayers,
-                QueryTriggerInteraction.Collide);
-
-            return numColliders == 0;
+            position.y = transform.position.y;
+            return !Physics.Raycast(position + Vector3.up, Vector3.down, 0.6f);
         }
 
         private Vector3 GetRandomPositionInBound() {
