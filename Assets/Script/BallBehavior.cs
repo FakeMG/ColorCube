@@ -7,29 +7,45 @@ namespace Script {
     public class BallBehavior : MonoBehaviour {
         [SerializeField] private BoxCollider ground;
         [SerializeField] private UnityEvent onPlayerTriggerEnter;
+        [SerializeField] private UnityEvent onLose;
 
         private void OnTriggerEnter(Collider other) {
-            if (other.CompareTag("Player")) {
-                StartCoroutine(RepositionRandomly());
-                onPlayerTriggerEnter?.Invoke();
+            if (other.CompareTag("Player") && transform.localScale == Vector3.one) {
+                Renderer object1Renderer = other.GetComponent<Renderer>();
+                Renderer object2Renderer = GetComponent<Renderer>();
+
+                if (object1Renderer.material.color == object2Renderer.material.color) {
+                    StartCoroutine(RepositionRandomly());
+                    onPlayerTriggerEnter?.Invoke();
+                } else {
+                    onLose?.Invoke();
+                }
             }
         }
 
         private IEnumerator RepositionRandomly() {
-            var bounds = ground.bounds;
-
-            float newX = Random.Range(bounds.min.x, bounds.max.x);
-            newX = RoundToNearestHalf(newX);
-
-            float newZ = Random.Range(bounds.min.z, bounds.max.z);
-            newZ = RoundToNearestHalf(newZ);
-
-            Vector3 randomPosition = new Vector3(newX, transform.position.y, newZ);
+            var randomPosition = GetRandomPositionInBound();
+            randomPosition.y = transform.position.y;
             transform.localScale = Vector3.zero;
 
             yield return new WaitForSeconds(1f);
             transform.localScale = Vector3.one;
             transform.position = randomPosition;
+        }
+
+        private Vector3 GetRandomPositionInBound() {
+            var bounds = ground.bounds;
+
+            float newX = Random.Range(bounds.min.x, bounds.max.x);
+            newX = RoundToNearestHalf(newX);
+
+            float newY = Random.Range(bounds.min.y, bounds.max.y);
+            newY = RoundToNearestHalf(newY);
+
+            float newZ = Random.Range(bounds.min.z, bounds.max.z);
+            newZ = RoundToNearestHalf(newZ);
+
+            return new Vector3(newX, newY, newZ);
         }
 
         private float RoundToNearestHalf(float value) {
