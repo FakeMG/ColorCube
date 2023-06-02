@@ -25,12 +25,25 @@ namespace Script {
 
         private IEnumerator RepositionRandomly() {
             var randomPosition = GetRandomPositionInBound();
+            while (IsPositionValid(randomPosition) == false) {
+                randomPosition = GetRandomPositionInBound();
+            }
+
             randomPosition.y = transform.position.y;
             transform.localScale = Vector3.zero;
 
             yield return new WaitForSeconds(1f);
             transform.localScale = Vector3.one;
             transform.position = randomPosition;
+        }
+
+        private bool IsPositionValid(Vector3 position) {
+            Collider[] colliders = new Collider[10];
+
+            int numColliders = Physics.OverlapSphereNonAlloc(position, 0.4f, colliders, Physics.AllLayers,
+                QueryTriggerInteraction.Collide);
+
+            return numColliders == 0;
         }
 
         private Vector3 GetRandomPositionInBound() {
